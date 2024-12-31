@@ -4,27 +4,37 @@
   vars:
     mysql_root_password: ExpenseApp@1
     login_host: mysql.vensa.online
+
   tasks:
   - name: disable default nodejs
-    ansible.builtin.command: dnf module disable nodejs -y
+    ansible.builtin.command: "dnf module disable nodejs -y"
+
   - name: enable nodejs 20
-    ansible.builtin.command: dnf module enable nodejs:20 -y
-  - name: install nodejs 20
+    ansible.builtin.command: "dnf module enable nodejs:20 -y"
+
+  - name: install nodejs and mysql
     ansible.builtin.package:
-      name: nodejs
+      name: "{{ item }}"
       state: present
-  - name: create  expense user
+    loop:
+    - nodejs
+    - mysql
+
+  - name: create expense user
     ansible.builtin.user:
       name: expense
       state: present
+
   - name: create app dir
     ansible.builtin.file:
       path: /app
       state: directory
-  - name: download the BE code
+
+  - name: download backend code
     ansible.builtin.get_url:
       url: https://expense-builds.s3.us-east-1.amazonaws.com/expense-backend-v2.zip
       dest: /tmp/backend.zip
+
   - name: extract the backend code
     ansible.builtin.unarchive:
       src: /tmp/backend.zip
@@ -62,6 +72,3 @@
       daemon_reload: true
       state: restarted
       name: backend
-  
-
-  
