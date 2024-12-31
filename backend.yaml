@@ -45,6 +45,6 @@
       - PyMySQL
       - cryptography
       executable: pip3.9
-  - name: import mysql data
-    
+  
+
   
