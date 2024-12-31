@@ -25,10 +25,12 @@
     ansible.builtin.get_url:
       url: https://expense-builds.s3.us-east-1.amazonaws.com/expense-backend-v2.zip
       dest: /tmp/backend.zip
-  - name: extract the BE code
+  - name: extract the backend code
     ansible.builtin.unarchive:
       src: /tmp/backend.zip
       dest: /app
+      remote_src: yes
+
   - name: install dependencies
     ansible.builtin.command: npm install
     args:
@@ -45,6 +47,21 @@
       - PyMySQL
       - cryptography
       executable: pip3.9
+
+  - name: import mysql data
+    community.mysql.mysql_db:
+      login_user: root
+      login_password: "{{ mysql_root_password }}"
+      login_host: "{{ login_host }}"
+      target: /app/schema/backend.sql
+      name: all
+      state: import
+
+  - name: daemon reload
+    ansible.builtin.systemd_service:
+      daemon_reload: true
+      state: restarted
+      name: backend
   
 
   
